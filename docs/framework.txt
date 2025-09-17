@@ -1,0 +1,295 @@
+                                                         Logistics Operations Health Assessment Framework
+                                                    To benchmark and improve operations at each hierarchical level (Zone, Region, City, Branch), we
+                                                    define objective, quantitative questions grouped into weighted categories. Drawing on industry
+                                                    scorecard practices[1][2], we propose categories such as Operational Efficiency/Throughput
+                                                    (e.g. on-time delivery, lead time)[2][3], Quality/Accuracy (e.g. order accuracy, inventory
+                                                    accuracy)[2][4], Safety & Compliance (e.g. audit pass rates, incident rates)[1], Customer Service
+                                                    (e.g. satisfaction scores, SLA compliance)[5], and Financial Performance (e.g. cost per order,
+                                                    profit margin). Each category is assigned a weight (summing to 100%), and each question yields
+                                                    a numeric measure that is converted to a 0–100 score by a formula. For example, logistics KPIs
+                                                    like trailer utilization are computed as (used capacity/total capacity)×100[6]. We normalize each
+                                                    metric by comparing to a target or baseline (e.g. (Actual/Target)*100 for “higher is better”
+                                                    metrics, or (Target/Actual)*100 for “lower is better”), capping at 100. The overall health score is
+                                                    then the weighted average of all question scores[7]. Below we list the 50 questions and scoring
+                                                    rules for each hierarchy level (to be answered monthly by managers), along with category
+                                                    weights. This structure allows internal benchmarking and performance reviews across the
+                                                    organization.
+
+
+
+                                                           1) Zone-Level Assessment
+                                                    Proposed categories (each weight 20%):
+                                                       1.​ Operational Efficiency (20%) – Network throughput metrics (e.g. on-time delivery,
+                                                           equipment utilization, inventory turns)[2][3].
+                                                       2.​ Compliance & Safety (20%) – Regulatory and safety metrics (audit pass rates, incident
+                                                           rates, training compliance)[1].
+                                                       3.​ Strategic Initiatives (20%) – High-level project and capacity metrics (strategic project
+                                                           on-time rate, forecast accuracy, ROI on initiatives).
+                                                       4.​ Customer Service (20%) – Client-focused metrics (customer satisfaction, fill rates,
+                                                           complaint resolution).
+                                                       5.​ Financial Performance (20%) – Cost and profitability metrics (cost per order, cost ratios,
+                                                           margins).
+
+Q. No.         Category (Wt%)           Q. Wt (%)                                 Question                                                                        Score Formula
+  1      Operational Efficiency (20%)      2%               On-time delivery rate (%) across the zone this month                                             Score = Actual_on_time_%
+  2      Operational Efficiency (20%)      2%           Perfect order rate (%) – deliveries complete and undamaged                                        Score = Actual_perfect_order_%
+  3      Operational Efficiency (20%)      2%                     Avg order lead time (hrs; lower is better)                                   Score = (Target_lead_time / Actual_lead_time) * 100
+  4      Operational Efficiency (20%)      2%               Fleet utilization rate (%) (vehicles used vs available)                                         Score = Actual_fleet_util_%
+  5      Operational Efficiency (20%)      2%              Trailer utilization rate (%) (volume loaded vs capacity)                                         Score = Actual_trailer_util_%
+  6      Operational Efficiency (20%)      2%                Order accuracy rate (%) (orders with correct items)                                          Score = Actual_order_accuracy_%
+Q. No.         Category (Wt%)           Q. Wt (%)                              Question                                                              Score Formula
+  7      Operational Efficiency (20%)      2%            Damage-free shipment rate (%) (no cargo damage)                                      Score = Actual_damage_free_%
+  8      Operational Efficiency (20%)      2%             Avg handling time per order (hrs; lower is better)                    Score = (Target_handling_time / Actual_handling_time) * 100
+  9      Operational Efficiency (20%)      2%                 Inventory turnover rate (times per month)                              Score = (Actual_turnover / Target_turnover) * 100
+ 10      Operational Efficiency (20%)      2%              Facility uptime (%) (percent of time operational)                                     Score = Actual_uptime_%
+ 11      Compliance & Safety (20%)         2%                       Regulatory audit pass rate (%)                                        Score = Actual_regulatory_audit_pass_%
+ 12      Compliance & Safety (20%)         2%                  Safety certification compliance rate (%)                                  Score = Actual_safety_cert_compliance_%
+ 13      Compliance & Safety (20%)         2%               Safety training completion rate (%) this month                                 Score = Actual_training_completion_%
+ 14      Compliance & Safety (20%)         2%                Scheduled maintenance completion rate (%)                        Score = (Completed_maintenance / Planned_maintenance) * 100
+ 15      Compliance & Safety (20%)         2%                     Vehicle inspection compliance (%)                           Score = (Completed_inspections / Scheduled_inspections) * 100
+ 16      Compliance & Safety (20%)         2%             Product quality compliance rate (%) (within specs)                           Score = Actual_product_quality_compliance_%
+ 17      Compliance & Safety (20%)         2%       Workplace accident rate (per 1000 employees; lower is better)               Score = (Target_accident_rate / Actual_accident_rate) * 100
+ 18      Compliance & Safety (20%)         2%          OSHA incident rate (per 100 employees; lower is better)                     Score = (Target_OSHA_rate / Actual_OSHA_rate) * 100
+ 19      Compliance & Safety (20%)         2%               Branches with zero compliance violations (%)                                 Score = Actual_zero_violation_branches_%
+ 20      Compliance & Safety (20%)         2%         Audit findings closure rate (%) (finding resolved on time)                      Score = (Closed_findings / Open_findings) * 100
+ 21       Strategic Initiatives (20%)      2%            Strategic project completion rate (%) (on schedule)                              Score = Actual_strategic_completion_%
+ 22       Strategic Initiatives (20%)      2%                   Forecast accuracy (%) (vs annual plan)                                      Score = Actual_forecast_accuracy_%
+ 23       Strategic Initiatives (20%)      2%                    Strategic budget adherence rate (%)                                       Score = Actual_budget_adherence_%
+ 24       Strategic Initiatives (20%)      2%         Avg time to implement new service (days; lower is better)          Score = (Target_implementation_time / Actual_implementation_time) * 100
+ 25       Strategic Initiatives (20%)      2%                  System uptime (%) (corporate systems)                                         Score = Actual_system_uptime_%
+ 26       Strategic Initiatives (20%)      2%                Employee turnover rate (%) (lower is better)                       Score = (Target_turnover_rate / Actual_turnover_rate) * 100
+ 27       Strategic Initiatives (20%)      2%           Annual network capacity growth (%) (target vs actual)                 Score = (Actual_capacity_growth / Target_capacity_growth) * 100
+ 28       Strategic Initiatives (20%)      2%                    New route launch rate (%) (vs plan)                             Score = (Actual_new_routes / Planned_new_routes) * 100
+ 29       Strategic Initiatives (20%)      2%             IT project completion rate (%) (planned vs done)                      Score = (Completed_IT_projects / Planned_IT_projects) * 100
+ 30       Strategic Initiatives (20%)      2%            ROI on strategic initiatives (%) (achieved vs planned)                          Score = (Actual_ROI / Planned_ROI) * 100
+ 31        Customer Service (20%)          2%                  Customer satisfaction score (%) (survey)                                      Score = Actual_cust_sat_score_%
+ 32        Customer Service (20%)          2%                    Customer on-time delivery rate (%)                                        Score = Actual_customer_on_time_%
+ 33        Customer Service (20%)          2%                 Order fill rate (%) (orders delivered in full)                                    Score = Actual_order_fill_%
+ 34        Customer Service (20%)          2%           Avg complaint resolution time (days; lower is better)       Score = (Target_complaint_resolution_time / Actual_complaint_resolution_time) * 100
+ 35        Customer Service (20%)          2%                    Annual customer retention rate (%)                                        Score = Actual_customer_retention_%
+ 36        Customer Service (20%)          2%                      Invoice processing accuracy (%)                                          Score = Actual_invoice_accuracy_%
+ 37        Customer Service (20%)          2%                  SLA compliance rate (%) (contracts met)                                      Score = Actual_SLA_compliance_%
+ 38        Customer Service (20%)          2%              Avg inquiry response time (hrs; lower is better)                    Score = (Target_response_time / Actual_response_time) * 100
+ 39        Customer Service (20%)          2%               Customer complaint rate (%) (lower is better)                      Score = (Target_complaint_rate / Actual_complaint_rate) * 100
+Q. No.        Category (Wt%)            Q. Wt (%)                                  Question                                                                       Score Formula
+  40       Customer Service (20%)           2%                             Net Promoter Score (%)                                                              Score = Actual_NPS_%
+  41     Financial Performance (20%)        2%                            Avg cost per order (USD)                                      Score = (Budgeted_cost_per_order / Actual_cost_per_order) * 100
+  42     Financial Performance (20%)        2%                       Transportation cost (% of revenue)                               Score = (Target_transport_cost_pct / Actual_transport_cost_pct) * 100
+  43     Financial Performance (20%)        2%                       Inventory carrying cost (% of value)                             Score = (Target_inventory_cost_pct / Actual_inventory_cost_pct) * 100
+  44     Financial Performance (20%)        2%                    Budget variance (%) (under/over budget)                                     Score = (Budgeted_expense / Actual_expense) * 100
+  45     Financial Performance (20%)        2%                                 Profit margin (%)                                           Score = (Actual_profit_margin / Target_profit_margin) * 100
+  46     Financial Performance (20%)        2%                               Return on assets (%)                                                    Score = (Actual_ROA / Target_ROA) * 100
+  47     Financial Performance (20%)        2%                          Fuel efficiency (miles/gallon)                                    Score = (Actual_fuel_efficiency / Target_fuel_efficiency) * 100
+  48     Financial Performance (20%)        2%                          Accounts receivable turnover                                        Score = (Actual_AR_turnover / Target_AR_turnover) * 100
+  49     Financial Performance (20%)        2%                            Working capital turnover                                         Score = (Actual_WC_turnover / Target_WC_turnover) * 100
+  50     Financial Performance (20%)        2%                        Overhead cost per branch (USD)                                         Score = (Budgeted_overhead / Actual_overhead) * 100
+
+
+
+                                                           2) Region-Level Assessment
+                                                    At the Region level (overseeing multiple cities), we focus on mid-tier operational metrics.
+                                                    Categories and weights include:
+                                                       1.​ Transportation & Distribution (20%) – e.g. regional on-time shipment rate, average
+                                                           transit time, vehicle utilization.
+                                                       2.​ Warehouse / Inventory (20%) – e.g. distribution center inventory accuracy, order cycle
+                                                           time.
+                                                       3.​ Process Efficiency (20%) – e.g. shipments per worker, operational cost per unit.
+                                                       4.​ Safety & Compliance (20%) – e.g. safety incident rates in the region, audit compliance.
+                                                       5.​ Customer Service (20%) – e.g. local customer satisfaction, order fill rates.
+
+Q. No.     Category (Wt%)        Q. Wt (%)                                      Question                                                                           Score Formula
+  1      Transportation (20%)          2%                  On-time shipment rate (%) for regional deliveries                                                  Score = Actual_on_time_%
+  2      Transportation (20%)          2%                     Average transit time (hours; lower is better)                                  Score = (Target_transit_time / Actual_transit_time) * 100
+  3      Transportation (20%)          2%                Truck turnaround rate (min at facility; lower is better)                        Score = (Target_turnaround_time / Actual_turnaround_time) * 100
+  4      Transportation (20%)          2%                     Fleet utilization (%) (regional vehicle usage)                                                 Score = Actual_fleet_util_%
+  5      Transportation (20%)          2%                   Freight cost per shipment (USD; lower is better)                           Score = (Target_cost_per_shipment / Actual_cost_per_shipment) * 100
+  6      Transportation (20%)          2%                     Transportation cost (% of regional revenue)                              Score = (Target_transport_cost_pct / Actual_transport_cost_pct) * 100
+  7      Transportation (20%)          2%               Percentage of regional shipments with accurate billing                                         Score = Actual_freight_bill_accuracy_%
+  8      Transportation (20%)          2%              Average dwell time at regional hub (hrs; lower is better)                              Score = (Target_dwell_time / Actual_dwell_time) * 100
+  9      Transportation (20%)          2%                                Trailer load fill rate (%)                                                        Score = Actual_trailer_load_pct
+ 10      Transportation (20%)          2%                       Fuel cost per mile (USD; lower is better)                                         Score = (Target_fuel_cost / Actual_fuel_cost) * 100
+Q. No.   Category (Wt%)    Q. Wt (%)                                     Question                                                                  Score Formula
+ 11      Warehouse (20%)      2%                          Inventory accuracy (%) at regional DCs                                        Score = Actual_inventory_accuracy_%
+ 12      Warehouse (20%)      2%                                Order picking accuracy (%)                                            Score = Actual_order_picking_accuracy_%
+ 13      Warehouse (20%)      2%                Average warehouse order cycle time (hrs; lower is better)                       Score = (Target_cycle_time / Actual_cycle_time) * 100
+ 14      Warehouse (20%)      2%                          On-time warehouse dispatch rate (%)                                           Score = Actual_dispatch_on_time_%
+ 15      Warehouse (20%)      2%                      Dock-to-stock cycle time (hrs; lower is better)                       Score = (Target_dock_to_stock / Actual_dock_to_stock) * 100
+ 16      Warehouse (20%)      2%                     Warehouse cost per unit (USD; lower is better)                          Score = (Target_cost_per_unit / Actual_cost_per_unit) * 100
+ 17      Warehouse (20%)      2%                             Warehouse space utilization (%)                                             Score = Actual_space_utilization_%
+ 18      Warehouse (20%)      2%                    Shrinkage rate (%) (inventory loss; lower is better)                    Score = (Target_shrinkage_rate / Actual_shrinkage_rate) * 100
+ 19      Warehouse (20%)      2%                    Number of backorders per month (lower is better)                           Score = (Target_backorders / Actual_backorders) * 100
+ 20      Warehouse (20%)      2%                 Pallet movement per labor-hour (units; higher is better)                  Score = (Actual_units_per_hour / Target_units_per_hour) * 100
+ 21       Process (20%)       2%                           Shipments per employee (monthly)                            Score = (Actual_shipments_per_emp / Target_shipments_per_emp) * 100
+ 22       Process (20%)       2%                   Processing cost per shipment (USD; lower is better)                        Score = (Target_process_cost / Actual_process_cost) * 100
+ 23       Process (20%)       2%                 Percentage of standard operating procedures followed                                    Score = Actual_SOP_compliance_%
+ 24       Process (20%)       2%                        Automation rate of manual processes (%)                                          Score = Actual_automation_rate_%
+ 25       Process (20%)       2%         Regional process cycle time (total order to delivery, hrs; lower is better)            Score = (Target_total_cycle / Actual_total_cycle) * 100
+ 26       Process (20%)       2%                Supply chain efficiency index (composite, higher is better)                                     Score = Actual_SCI_%
+ 27       Process (20%)       2%                        Percentage of on-time project milestones                                      Score = Actual_milestone_completion_%
+ 28       Process (20%)       2%                         IT systems uptime (%) (regional systems)                                           Score = Actual_IT_uptime_%
+ 29       Process (20%)       2%                          Data accuracy rate (%) in key systems                                           Score = Actual_data_accuracy_%
+ 30       Process (20%)       2%                Percentage of operations supported by real-time tracking                                 Score = Actual_realtime_support_%
+ 31        Safety (20%)       2%       Regional OSHA recordable incident rate (per 100 employees; lower is better)                   Score = (Target_OSHA / Actual_OSHA) * 100
+ 32        Safety (20%)       2%                            Safety training hours per employee                                       Score = (Actual_hours / Target_hours) * 100
+ 33        Safety (20%)       2%                   Number of safety audits completed on schedule (%)                                   Score = Actual_audits_on_schedule_%
+ 34        Safety (20%)       2%                      Incident response time (mins; lower is better)                             Score = (Target_response / Actual_response) * 100
+ 35        Safety (20%)       2%       Work-related injury frequency (incidents per million hours; lower is better)            Score = (Target_injury_rate / Actual_injury_rate) * 100
+ 36        Safety (20%)       2%                 Percentage of sites passing safety audit without findings                               Score = Actual_sites_no_findings_%
+ 37        Safety (20%)       2%                            Environmental compliance rate (%)                                            Score = Actual_env_compliance_%
+ 38        Safety (20%)       2%                       Corrective actions closure rate (%) (on time)                              Score = (Closed_actions / Assigned_actions) * 100
+ 39        Safety (20%)       2%               Lost-time incident rate (per 100 employees; lower is better)                       Score = (Target_LTI_rate / Actual_LTI_rate) * 100
+ 40        Safety (20%)       2%                   Percentage of safety equipment checks completed                                       Score = Actual_equipment_check_%
+ 41      Customer (20%)       2%                         Regional customer satisfaction score (%)                                         Score = Actual_region_cust_sat_%
+ 42      Customer (20%)       2%                  Regional on-time response to customer inquiries (%)                                     Score = Actual_response_rate_%
+ 43      Customer (20%)       2%                    Percentage of repeat orders processed error-free                                    Score = Actual_error_free_repeat_%
+Q. No.       Category (Wt%)          Q. Wt (%)                              Question                                                                       Score Formula
+ 44          Customer (20%)             2%          Region-level perfect order rate (%) (no issues per order)                                  Score = Actual_region_perfect_order_%
+ 45          Customer (20%)             2%        Average lead time for regional orders (days; lower is better)                     Score = (Target_regional_lead / Actual_regional_lead) * 100
+ 46          Customer (20%)             2%                     Percentage of customer SLAs met                                                      Score = Actual_SLAs_met_%
+ 47          Customer (20%)             2%                      On-time invoice generation (%)                                                   Score = Actual_invoice_on_time_%
+ 48          Customer (20%)             2%          Average payment collection time (days; lower is better)                        Score = (Target_collection_time / Actual_collection_time) * 100
+ 49          Customer (20%)             2%                   Monthly customer complaint rate (%)                                       Score = (Target_complaints / Actual_complaints) * 100
+ 50          Customer (20%)             2%            Percentage of customer queries resolved within 24h                                       Score = Actual_queries_resolved_24h_%
+
+
+
+                                                        3) City-Level Assessment
+                                                 At the City level, metrics are more operational/local. Categories (each 20%) include Local
+                                                 Delivery Efficiency, Inventory & Stock Control, Process Adherence, Safety & Compliance, and
+                                                 Customer Service.
+
+Q. No.       Category (Wt%)          Q. Wt (%)                              Question                                                                       Score Formula
+  1      Delivery Efficiency (20%)      2%                       City delivery on-time rate (%)                                                      Score = Actual_on_time_%
+  2      Delivery Efficiency (20%)      2%              Avg last-mile delivery time (min; lower is better)                          Score = (Target_delivery_time / Actual_delivery_time) * 100
+  3      Delivery Efficiency (20%)      2%                   Delivery density (deliveries per route)                                       Score = (Actual_density / Target_density) * 100
+  4      Delivery Efficiency (20%)      2%              Vehicle loading rate (%) (used capacity vs total)                                          Score = Actual_loading_rate_%
+  5      Delivery Efficiency (20%)      2%           Percentage of deliveries with digital proof-of-delivery                                           Score = Actual_POD_%
+  6      Delivery Efficiency (20%)      2%                   Fuel efficiency for city fleet (km/liter)                                    Score = (Actual_fuel_eff / Target_fuel_eff) * 100
+  7      Delivery Efficiency (20%)      2%        Turnaround time for city hub reloading (min; lower is better)                        Score = (Target_turnaround / Actual_turnaround) * 100
+  8      Delivery Efficiency (20%)      2%                        Backhaul utilization rate (%)                                                   Score = Actual_backhaul_util_%
+  9      Delivery Efficiency (20%)      2%                          On-time pickup rate (%)                                                      Score = Actual_on_time_pickup_%
+ 10      Delivery Efficiency (20%)      2%                   City-level shipment per driver per day                               Score = (Actual_shipments_per_driver / Target_per_driver) * 100
+ 11          Inventory (20%)            2%                       Branch inventory accuracy (%)                                                  Score = Actual_inventory_accuracy_%
+ 12          Inventory (20%)            2%                     Stockout rate (%) (lower is better)                                  Score = (Target_stockout_rate / Actual_stockout_rate) * 100
+ 13          Inventory (20%)            2%                      Cycle count completion rate (%)                                                    Score = Actual_cycle_count_%
+ 14          Inventory (20%)            2%                Days of inventory on hand (lower is better)                                          Score = (Target_DOI / Actual_DOI) * 100
+ 15          Inventory (20%)            2%                            Space utilization (%)                                                      Score = Actual_space_utilization_%
+ 16          Inventory (20%)            2%                       Shrinkage (%) (lower is better)                                        Score = (Target_shrinkage / Actual_shrinkage) * 100
+ 17          Inventory (20%)            2%               Expired or obsolete stock (%) (lower is better)                                 Score = (Target_obsolete / Actual_obsolete) * 100
+ 18          Inventory (20%)            2%                   Order fill time (hours; lower is better)                                     Score = (Target_fill_time / Actual_fill_time) * 100
+ 19          Inventory (20%)            2%                          Fill rate to customers (%)                                                       Score = Actual_fill_rate_%
+Q. No.   Category (Wt%)    Q. Wt (%)                                 Question                                                             Score Formula
+ 20      Inventory (20%)      2%                          Inventory turnover (times/year)                            Score = (Actual_inv_turnover / Target_inv_turnover) * 100
+ 21      Process (20%)        2%                        Percentage of processes automated                                          Score = Actual_automation_%
+ 22      Process (20%)        2%            Staff training compliance (%) (completed required training)                              Score = Actual_training_%
+ 23      Process (20%)        2%              Adherence to standard pickup/check-in procedures (%)                               Score = Actual_SOP_adherence_%
+ 24      Process (20%)        2%                           Order processing accuracy (%)                                       Score = Actual_processing_accuracy_%
+ 25      Process (20%)        2%                 Avg daily throughput (packages handled per day)                      Score = (Actual_throughput / Target_throughput) * 100
+ 26      Process (20%)        2%                           Call center response rate (%)                                          Score = Actual_call_response_%
+ 27      Process (20%)        2%                          Reports submitted on time (%)                                              Score = Actual_reports_%
+ 28      Process (20%)        2%                 Percentage of branches meeting audit schedules                              Score = Actual_branches_on_schedule_%
+ 29      Process (20%)        2%                       Internal inventory audit pass rate (%)                                    Score = Actual_inventory_audit_%
+ 30      Process (20%)        2%                 Percentage of escalations resolved within SLA (%)                            Score = Actual_escalations_resolved_%
+ 31       Safety (20%)        2%       City-level incident rate (accidents per 100 employees; lower is better)      Score = (Target_incident_rate / Actual_incident_rate) * 100
+ 32       Safety (20%)        2%           PPE compliance (%) (personnel wearing required equipment)                             Score = Actual_PPE_compliance_%
+ 33       Safety (20%)        2%                        Number of safety audits passed (%)                                  Score = (Passed_audits / Total_audits) * 100
+ 34       Safety (20%)        2%                       Compliance with local regulations (%)                                    Score = Actual_local_compliance_%
+ 35       Safety (20%)        2%              Environmental safety incidents (count; lower is better)                    Score = (Target_incidents / Actual_incidents) * 100
+ 36       Safety (20%)        2%                           Fire drill completion rate (%)                                            Score = Actual_fire_drill_%
+ 37       Safety (20%)        2%                           Equipment inspection rate (%)                                      Score = Actual_equipment_inspection_%
+ 38       Safety (20%)        2%                        Ergonomic training completion (%)                                      Score = Actual_ergonomic_training_%
+ 39       Safety (20%)        2%          Lost-time injury frequency (per 100 employees; lower is better)                      Score = (Target_LTI / Actual_LTI) * 100
+ 40       Safety (20%)        2%                  Compliance with waste disposal regulations (%)                                Score = Actual_waste_compliance_%
+ 41      Customer (20%)       2%                          In-city customer satisfaction (%)                                       Score = Actual_city_cust_sat_%
+ 42      Customer (20%)       2%                       Percentage of orders delivered in full                                     Score = Actual_orders_in_full_%
+ 43      Customer (20%)       2%                      City-level complaint resolution rate (%)                                 Score = Actual_city_complaint_res_%
+ 44      Customer (20%)       2%              Average follow-up response time (hrs; lower is better)                    Score = (Target_follow_up / Actual_follow_up) * 100
+ 45      Customer (20%)       2%                          Customer repeat order rate (%)                                          Score = Actual_repeat_order_%
+ 46      Customer (20%)       2%                           Local net promoter score (%)                                             Score = Actual_city_NPS_%
+ 47      Customer (20%)       2%                        Timeliness of emergency orders (%)                                    Score = Actual_emergency_on_time_%
+ 48      Customer (20%)       2%               Percentage of customers enrolled in loyalty programs                                  Score = Actual_loyalty_%
+ 49      Customer (20%)       2%                       Feedback survey completion rate (%)                                         Score = Actual_survey_rate_%
+ 50      Customer (20%)       2%                       Cancellation rate (%) (lower is better)                   Score = (Target_cancellation_rate / Actual_cancellation_rate) * 100
+                                                        4) Branch-Level Assessment
+                                                 At the Branch (site) level, questions focus on day-to-day operations. Categories (20% each)
+                                                 include Daily Operations Efficiency, Inventory Accuracy, Safety & Compliance, Process
+                                                 Adherence, and Equipment/Maintenance.
+
+Q. No.        Category (Wt%)         Q. Wt (%)                                Question                                                                            Score Formula
+  1           Daily Ops (20%)           2%                         Shipments processed per day                                                 Score = (Actual_shipments / Target_shipments) * 100
+  2           Daily Ops (20%)           2%                      On-time delivery rate (%) at branch                                                         Score = Actual_on_time_%
+  3           Daily Ops (20%)           2%                           Order picking accuracy (%)                                                         Score = Actual_picking_accuracy_%
+  4           Daily Ops (20%)           2%                           Shipments per labor-hour                                           Score = (Actual_shipments_per_hour / Target_per_hour) * 100
+  5           Daily Ops (20%)           2%                         Branch throughput vs plan (%)                                           Score = (Actual_throughput / Planned_throughput) * 100
+  6           Daily Ops (20%)           2%                  Queue time at branch (mins; lower is better)                                   Score = (Target_queue_time / Actual_queue_time) * 100
+  7           Daily Ops (20%)           2%                Local customer complaints (%) (lower is better)                                      Score = (Target_complaints / Actual_complaints) * 100
+  8           Daily Ops (20%)           2%                            Price quote accuracy (%)                                                          Score = Actual_quote_accuracy_%
+  9           Daily Ops (20%)           2%        Order cycle time (hours from order to dispatch; lower is better)                             Score = (Target_cycle_time / Actual_cycle_time) * 100
+ 10           Daily Ops (20%)           2%                 Stockout incidents per month (lower is better)                                       Score = (Target_stockouts / Actual_stockouts) * 100
+ 11           Inventory (20%)           2%                          Inventory count accuracy (%)                                                       Score = Actual_inventory_accuracy_%
+ 12           Inventory (20%)           2%                          Cycle count completion (%)                                                            Score = Actual_cycle_count_%
+ 13           Inventory (20%)           2%                                Order fill rate (%)                                                                Score = Actual_fill_rate_%
+ 14           Inventory (20%)           2%           Inventory replenishment lead time (days; lower is better)                           Score = (Target_replenishment / Actual_replenishment) * 100
+ 15           Inventory (20%)           2%           Number of inventory adjustments (count; lower is better)                              Score = (Target_adjustments / Actual_adjustments) * 100
+ 16           Inventory (20%)           2%           Stock accuracy (negative adjustments) (%) (lower is better)                               Score = (Target_neg_adjust / Actual_neg_adjust) * 100
+ 17           Inventory (20%)           2%                       Return rate (%) (customer returns)                                        Score = (Target_return_rate / Actual_return_rate) * 100
+ 18           Inventory (20%)           2%                   Wastage/spoilage rate (%) (lower is better)                                            Score = (Target_waste / Actual_waste) * 100
+ 19           Inventory (20%)           2%                     Stock rotation index (times per month)                                            Score = (Actual_rotation / Target_rotation) * 100
+ 20           Inventory (20%)           2%                    Inventory to sales ratio (target vs actual)                                            Score = (Actual_ratio / Target_ratio) * 100
+ 21      Safety & Compliance (20%)      2%        Branch OSHA incident rate (per 100 employees; lower is better)                                    Score = (Target_OSHA / Actual_OSHA) * 100
+ 22      Safety & Compliance (20%)      2%                      Safety checklist completion rate (%)                                                        Score = Actual_checklist_%
+ 23      Safety & Compliance (20%)      2%                        Emergency drill completion (%)                                                               Score = Actual_drill_%
+ 24      Safety & Compliance (20%)      2%                 Personal protective equipment compliance (%)                                                        Score = Actual_PPE_%
+ 25      Safety & Compliance (20%)      2%            Number of safety violations this month (lower is better)                                  Score = (Target_violations / Actual_violations) * 100
+ 26      Safety & Compliance (20%)      2%                       Chemical handling compliance (%)                                                           Score = Actual_chemical_%
+ 27      Safety & Compliance (20%)      2%                           Vehicle inspection rate (%)                                                       Score = Actual_vehicle_inspection_%
+ 28      Safety & Compliance (20%)      2%              Safety incident response time (mins; lower is better)                                   Score = (Target_response / Actual_response) * 100
+Q. No.        Category (Wt%)         Q. Wt (%)                                Question                                                                           Score Formula
+ 29      Safety & Compliance (20%)      2%              Percentage of equipment maintenance on schedule                                                  Score = Actual_maintenance_%
+ 30      Safety & Compliance (20%)      2%                          Compliance training rate (%)                                                      Score = Actual_training_compliance_%
+ 31            Process (20%)            2%                 Standard operating procedure compliance (%)                                                 Score = Actual_SOP_compliance_%
+ 32            Process (20%)            2%            Number of non-conformance incidents (lower is better)                            Score = (Target_nonconformances / Actual_nonconformances) * 100
+ 33            Process (20%)            2%              Time to resolve customer issues (hrs; lower is better)                                Score = (Target_resolution / Actual_resolution) * 100
+ 34            Process (20%)            2%                         Percentage of daily targets met                                                       Score = Actual_targets_met_%
+ 35            Process (20%)            2%                             Cross-docking rate (%)                                                              Score = Actual_crossdock_%
+ 36            Process (20%)            2%            Order cycle time for priority orders (hrs; lower is better)                          Score = (Target_priority_cycle / Actual_priority_cycle) * 100
+ 37            Process (20%)            2%                      Daily report submission on time (%)                                                    Score = Actual_reports_on_time_%
+ 38            Process (20%)            2%                       Percentage of courier pickups met                                                       Score = Actual_pickups_met_%
+ 39            Process (20%)            2%            Compliance with digital record-keeping (yes=100, no=0)                                              Score = (Compliant ? 100 : 0)
+ 40            Process (20%)            2%                          Parking space utilization (%)                                                        Score = Actual_parking_util_%
+ 41          Equipment (20%)            2%                             Equipment uptime (%)                                                           Score = Actual_equipment_uptime_%
+ 42          Equipment (20%)            2%                    Preventive maintenance completion (%)                                                       Score = Actual_preventive_%
+ 43          Equipment (20%)            2%                    Mean time to repair (hrs; lower is better)                                      Score = (Target_MTTRepair / Actual_MTTRepair) * 100
+ 44          Equipment (20%)            2%           Number of equipment failures per month (lower is better)                                    Score = (Target_failures / Actual_failures) * 100
+ 45          Equipment (20%)            2%                Percentage of safety checks done on equipment                                               Score = Actual_eqp_safety_checks_%
+ 46          Equipment (20%)            2%                      Inventory of spare parts accuracy (%)                                                   Score = Actual_spare_accuracy_%
+ 47          Equipment (20%)            2%                           Calibration compliance (%)                                                           Score = Actual_calibration_%
+ 48          Equipment (20%)            2%            Avg downtime of critical machines (hrs; lower is better)                                Score = (Target_downtime / Actual_downtime) * 100
+ 49          Equipment (20%)            2%                 Maintenance cost per unit ($; lower is better)                                  Score = (Target_cost_per_unit / Actual_cost_per_unit) * 100
+ 50          Equipment (20%)            2%               Backlog of preventive tasks (count; lower is better)                                    Score = (Target_backlog / Actual_backlog) * 100
+
+
+
+                                                 Score Calculation Mechanism
+                                                 Each question yields a score (0–100) via its formula. For “higher-is-better” metrics we use
+                                                 (Actual/Target)*100 (capped at 100), and for “lower-is-better” metrics we use (Target/Actual)*100.
+                                                 (For example, trailer utilization = (used/total)×100[6].) We then multiply each question’s score
+                                                 by its weight (in % of the total) and sum across all questions to compute the final health score
+                                                 out of 100[7]. In practice this is a weighted average (as in Balanced Scorecard methodology[7]).
+                                                 Example: If two questions in a category carry 70% and 30% weight, and their scores are 80 and
+                                                 90 respectively, the category score = 0.7×80 + 0.3×90 = 83[7]. The overall score is similarly the
+                                                 weighted sum of all question scores.
+Sources
+We base this framework on industry-standard logistics KPIs and scorecard methods[1][2][4][7],
+ensuring each question is objective and quantifiable. The cited references illustrate typical
+metrics (on-time delivery, inventory accuracy, perfect order rate, etc.) and weighted-scoring
+principles used in logistics scorecards[1][5][3][6].
+[1] boltrics.com
+https://www.boltrics.com/wp-content/uploads/2021/10/EN-Whitepaper-KPI-How-to-determin
+e-the-most-important-KPIs-for-your-logistics-business.pdf
+[2] [3] [4] [5] The Essential Logistics KPIs & Metrics You Need to Track | NetSuite
+https://www.netsuite.com/portal/resource/articles/inventory-management/logistics-kpis-metri
+cs.shtml
+[6] [7] Logistics Scorecard with Example of Strategy Map and KPIs
+https://bscdesigner.com/logistics-strategy.htm
+
