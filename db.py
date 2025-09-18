@@ -198,24 +198,3 @@ def monitor_pool_status():
 		return None
 
 
-def get_connection_metrics():
-	"""Get current database connection metrics"""
-	total_connections = connection_metrics["successful_connections"] + connection_metrics["failed_connections"]
-	avg_session_duration = (
-		sum(connection_metrics["session_durations"]) / len(connection_metrics["session_durations"])
-		if connection_metrics["session_durations"] else 0
-	)
-	
-	return {
-		"successful_connections": connection_metrics["successful_connections"],
-		"failed_connections": connection_metrics["failed_connections"],
-		"success_rate": (
-			connection_metrics["successful_connections"] / total_connections
-			if total_connections > 0 else 0
-		),
-		"last_connection_test": connection_metrics["last_connection_test"],
-		"average_session_duration": avg_session_duration,
-		"total_sessions": total_connections,
-		"pool_utilization": connection_metrics["pool_utilization"],
-		"pool_status": monitor_pool_status()
-	}

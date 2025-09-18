@@ -1,14 +1,10 @@
-import os
 import time
-from datetime import datetime, date
+from datetime import date
 import streamlit as st
-import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 
-from db import get_session, engine, cleanup_connections, handle_db_error, get_session_with_retry
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-from models import Base, User, Survey, Response, CategoryScore, AIFeedback
+from db import get_session, engine, handle_db_error
+from models import Base, Survey, Response, CategoryScore, AIFeedback
 from scoring import compute_question_score, compute_survey_scores
 from ai import generate_feedback
 from survey_definitions import FRAMEWORK
@@ -18,8 +14,6 @@ from mappings_loader import load_mappings, get_zones, get_regions, get_cities, g
 Base.metadata.create_all(bind=engine)
 
 
-LEVELS = ["Zone", "Region", "City", "Branch"]
-LEVEL_INDEX = {lvl: idx for idx, lvl in enumerate(LEVELS)}
 
 
 def _retry_db_operation(operation_func, max_retries=3, delay=1, operation_name="database operation"):
@@ -45,11 +39,17 @@ def _retry_db_operation(operation_func, max_retries=3, delay=1, operation_name="
 				raise
 
 
-def _allowed_levels_for_role(user_role: str) -> list:
-	if user_role == "Admin":
-		return LEVELS
-	start = LEVEL_INDEX.get(user_role, LEVEL_INDEX["Branch"])  # default deepest
-	return LEVELS[start:]
+def _load_existing_responses(survey_id: int) -> dict:
+	"""Load existing responses for a survey and return as question_id -> raw_value mapping"""
+	try:
+		with get_session() as db:
+			responses = db.query(Response).filter(Response.survey_id == survey_id).all()
+			return {response.question_id: response.raw_value for response in responses}
+	except Exception as e:
+		st.warning(f"Could not load existing responses: {handle_db_error(e, 'loading existing responses')}")
+		return {}
+
+
 
 
 def render_survey() -> None:
@@ -70,6 +70,7 @@ def render_survey() -> None:
 	
 	# Check if user already has a survey for this month with error handling
 	existing_score = None
+	existing_survey_id = None
 	try:
 		with get_session() as db:
 			existing_survey = db.query(Survey).filter(
@@ -78,6 +79,7 @@ def render_survey() -> None:
 			).first()
 			if existing_survey:
 				existing_score = existing_survey.overall_score
+				existing_survey_id = existing_survey.id
 	except (SQLAlchemyError, OperationalError) as e:
 		st.error(f"Unable to check existing surveys: {handle_db_error(e, 'checking existing surveys')}")
 		return
@@ -85,23 +87,20 @@ def render_survey() -> None:
 		st.error("An unexpected error occurred while checking existing surveys. Please try again.")
 		return
 	
-	if existing_survey:
+	if existing_survey_id:
 		st.warning(f"⚠️ You have already filled the survey for {period}. You can edit it below.")
 		edit_mode = st.checkbox("Edit existing survey", value=True)
+		
+		# Load existing responses when in edit mode
+		existing_responses = {}
+		if edit_mode:
+			existing_responses = _load_existing_responses(existing_survey_id)
 	else:
 		edit_mode = False
+		existing_responses = {}
 	
-	# Row 1: Assessment level (read-only for current month)
-	col_lvl, col_info = st.columns([1,1])
-	with col_lvl:
-		allowed_levels = _allowed_levels_for_role(user_role)
-		role_level = st.selectbox(
-			"Assessment Level",
-			options=allowed_levels,
-			index=0,  # first allowed is user's own level
-			help="You can view lower levels. Submission is allowed only for your own level.",
-			disabled=edit_mode  # Disable if editing
-		)
+	# Row 1: Status display
+	col_info = st.columns([1])[0]
 	with col_info:
 		if edit_mode and existing_score is not None:
 			st.metric("Existing Score", f"{existing_score:.1f}/100")
@@ -115,10 +114,6 @@ def render_survey() -> None:
 	user_city = st.session_state.get("user_city_id")
 	user_branch = st.session_state.get("user_branch_id")
 
-	# Assessment level-based disabling of lower selectors
-	disable_region_by_level = (role_level == "Zone")
-	disable_city_by_level = (role_level in ["Zone", "Region"])
-	disable_branch_by_level = (role_level in ["Zone", "Region", "City"])
 
 	# Row 2: Zone / Region / City / Branch in one row with role-based restriction
 	col_zone, col_region, col_city, col_branch = st.columns([1,1,1,1])
@@ -127,49 +122,63 @@ def render_survey() -> None:
 	zones = zones_all
 	if user_role in ["Zone","Region","City","Branch"] and user_zone:
 		zones = [z for z in zones_all if z == user_zone]
-	zone_default = zones[0] if zones else None
+	
+	# After computing zones
+	if not zones:
+		st.error("No zones available for your assignment. Please contact the administrator.")
+		return
+	
 	with col_zone:
-		zone = st.selectbox("Zone", options=zones, index=0 if zone_default in zones else 0, disabled=(user_role in ["Region","City","Branch"]))
+		zone = st.selectbox("Zone", options=zones, index=0, disabled=(user_role in ["Region","City","Branch"]))
 
-	# Regions (restrict by role) + disabled by assessment level
+	# Regions (restrict by role)
 	regions_all = get_regions(m, zone)
 	regions = regions_all
 	if user_role in ["Region","City","Branch"] and user_region:
 		regions = [r for r in regions_all if r == user_region]
-	region_default = regions[0] if regions else None
+	
+	# Repeat for regions based on selected zone
+	if not regions:
+		st.error("No regions available for the selected zone. Please contact the administrator.")
+		return
+	
 	with col_region:
-		region = st.selectbox("Region", options=regions, index=0 if region_default in regions else 0, disabled=((user_role in ["City","Branch"]) or disable_region_by_level))
+		region = st.selectbox("Region", options=regions, index=0, disabled=(user_role in ["City","Branch"]))
 
-	# Cities (restrict by role) + disabled by assessment level
+	# Cities (restrict by role)
 	cities_all = get_cities(m, zone, region)
 	cities = cities_all
 	if user_role in ["City","Branch"] and user_city:
 		cities = [c for c in cities_all if c == user_city]
-	city_default = cities[0] if cities else None
+	
+	# Repeat for cities based on selected region
+	if not cities:
+		st.error("No cities available for the selected region. Please contact the administrator.")
+		return
+	
 	with col_city:
-		city = st.selectbox("City", options=cities, index=0 if city_default in cities else 0, disabled=((user_role in ["Branch"]) or disable_city_by_level))
+		city = st.selectbox("City", options=cities, index=0, disabled=(user_role in ["Branch"]))
 
-	# Branches (restrict by role) + disabled by assessment level
+	# Branches (restrict by role)
 	branches_all = get_branches(m, zone, region, city)
 	branches = branches_all
 	if user_role in ["Branch"] and user_branch:
 		branches = [b for b in branches_all if b == user_branch]
-	branch_default = branches[0] if branches else None
+	
+	# Repeat for branches based on selected city
+	if not branches:
+		st.error("No branches available for the selected city. Please contact the administrator.")
+		return
+	
 	with col_branch:
 		branch = st.selectbox(
 			"Branch (Code)",
 			options=branches,
-			index=0 if branch_default in branches else 0,
-			format_func=lambda b: f"{b} - {m.get(zone, {}).get(region, {}).get(city, {}).get(b, '')}",
-			disabled=disable_branch_by_level
+			index=0,
+			format_func=lambda b: f"{b} - {m.get(zone, {}).get(region, {}).get(city, {}).get(b, '')}"
 		)
 
-	# View-only if not user's own level (Admins are view-only by requirement)
-	view_only = (role_level != user_role) or (user_role == "Admin")
-	if view_only:
-		st.info("Viewing data for a lower level. Inputs are disabled; submission is only allowed for your own level.")
-
-	categories = FRAMEWORK.get(role_level, [])
+	categories = FRAMEWORK.get(user_role, [])
 	if not categories:
 		st.error("Framework missing for this level.")
 		return
@@ -190,13 +199,21 @@ def render_survey() -> None:
 					is_binary = "yes=" in q["text"].lower() and "no=" in q["text"].lower()
 					
 					if is_binary:
+						# Check for existing response and convert to selectbox index
+						existing_value = existing_responses.get(question_index)
+						if existing_value == 100.0:
+							default_index = 1  # "Yes"
+						elif existing_value == 0.0:
+							default_index = 2  # "No"
+						else:
+							default_index = 0  # None
+						
 						val = st.selectbox(
 							"Select Option", 
 							options=[None, "Yes", "No"], 
-							index=0,  # Default to None
+							index=default_index,  # Pre-fill with existing value
 							key=f"act_{question_index}", 
-							label_visibility="collapsed", 
-							disabled=view_only
+							label_visibility="collapsed"
 						)
 						# Convert to numeric: Yes=100, No=0, None=None
 						if val == "Yes":
@@ -206,13 +223,17 @@ def render_survey() -> None:
 						else:
 							val = None
 					else:
-						val_str = st.text_input("Actual Value", key=f"act_{question_index}", label_visibility="collapsed", disabled=view_only)
+						# Check for existing response and pre-fill text input
+						existing_value = existing_responses.get(question_index)
+						default_value = str(existing_value) if existing_value is not None else ""
+						
+						val_str = st.text_input("Actual Value", value=default_value, key=f"act_{question_index}", label_visibility="collapsed")
 						val = float(val_str) if val_str.strip() != "" else None
 					inputs[question_index] = {"actual": val, "target": q["target"], "formula": q["formula"], "weight": q["weight"], "cat_name": cat["name"]}
 		if edit_mode:
-			sub = st.form_submit_button("Update Survey", disabled=view_only)
+			sub = st.form_submit_button("Update Survey")
 		else:
-			sub = st.form_submit_button("Submit Survey", disabled=view_only)
+			sub = st.form_submit_button("Submit Survey")
 
 	if not sub:
 		return
@@ -228,14 +249,11 @@ def render_survey() -> None:
 		with get_session() as db:
 			if edit_mode:
 				# Update existing survey
-				survey = db.query(Survey).filter(
-					Survey.user_id == user_id,
-					Survey.period == period
-				).first()
+				survey = db.query(Survey).filter(Survey.id == existing_survey_id).first()
 				if not survey:
 					st.error("Survey not found for editing.")
 					return None, None, None, None
-				
+			
 				# Delete existing responses and category scores with error handling
 				try:
 					db.query(Response).filter(Response.survey_id == survey.id).delete()
@@ -244,15 +262,36 @@ def render_survey() -> None:
 				except Exception as cleanup_error:
 					st.warning(f"Warning: Could not clean up existing data: {handle_db_error(cleanup_error, 'cleaning up existing data')}")
 			else:
+				# derive authoritative locations
+				role = st.session_state.get("user_role")
+				zone_id = st.session_state.get("user_zone_id") if role in ["Zone","Region","City","Branch"] else zone
+				region_id = st.session_state.get("user_region_id") if role in ["Region","City","Branch"] else region
+				city_id = st.session_state.get("user_city_id") if role in ["City","Branch"] else city
+				branch_id = st.session_state.get("user_branch_id") if role in ["Branch"] else branch
+				
+				# Optionally assert that any user-level-required ID exists, else st.error(...) and abort
+				if role in ["Zone","Region","City","Branch"] and not zone_id:
+					st.error("Zone ID is required for your role but not found in session. Please contact the administrator.")
+					return None, None, None, None
+				if role in ["Region","City","Branch"] and not region_id:
+					st.error("Region ID is required for your role but not found in session. Please contact the administrator.")
+					return None, None, None, None
+				if role in ["City","Branch"] and not city_id:
+					st.error("City ID is required for your role but not found in session. Please contact the administrator.")
+					return None, None, None, None
+				if role in ["Branch"] and not branch_id:
+					st.error("Branch ID is required for your role but not found in session. Please contact the administrator.")
+					return None, None, None, None
+				
 				# Create new survey
 				survey = Survey(
 					user_id=st.session_state["user_id"],
-					role_level=role_level,
+					role_level=role,
 					period=period,
-					zone_id=zone,
-					region_id=region,
-					city_id=city,
-					branch_id=branch,
+					zone_id=zone_id,
+					region_id=region_id,
+					city_id=city_id,
+					branch_id=branch_id,
 				)
 				db.add(survey)
 				db.flush()

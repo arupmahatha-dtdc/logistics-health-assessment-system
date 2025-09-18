@@ -11,18 +11,20 @@ from survey_definitions import FRAMEWORK
 from scoring import compute_question_score
 
 
-def _scoped_query(db, role: str, z: str, r: str, c: str, b: str):
+def _scoped_query(db, user_id: int, role: str, z: str, r: str, c: str, b: str, include_subordinates: bool = False):
 	q = db.query(Survey)
-	if role == "Admin" or role in (None, ""):
-		return q
+	if role in ("Admin", None, ""):
+		return q  # Caller applies extra filters
+	if not include_subordinates:
+		return q.filter(Survey.user_id == user_id)
 	if role == "Zone":
-		return q.filter(Survey.zone_id == z)
+		return q.filter((Survey.user_id == user_id) | ((Survey.zone_id == z) & Survey.role_level.in_(["Region","City","Branch"])))
 	if role == "Region":
-		return q.filter(Survey.zone_id == z, Survey.region_id == r)
+		return q.filter((Survey.user_id == user_id) | ((Survey.zone_id == z) & (Survey.region_id == r) & Survey.role_level.in_(["City","Branch"])))
 	if role == "City":
-		return q.filter(Survey.zone_id == z, Survey.region_id == r, Survey.city_id == c)
+		return q.filter((Survey.user_id == user_id) | ((Survey.zone_id == z) & (Survey.region_id == r) & (Survey.city_id == c) & (Survey.role_level == "Branch")))
 	# Branch
-	return q.filter(Survey.zone_id == z, Survey.region_id == r, Survey.city_id == c, Survey.branch_id == b)
+	return q.filter(Survey.user_id == user_id)
 
 
 def render_dashboard() -> None:
@@ -39,14 +41,81 @@ def render_dashboard() -> None:
 		st.error("Please log in to view dashboard.")
 		return
 	
+	# Team survey viewing options
+	st.subheader("👥 Survey Viewing Options")
+	if user_role != "Branch":
+		show_team_surveys = st.checkbox(
+			"Show surveys from my team", 
+			help="Enable to view surveys from users below your hierarchy level"
+		)
+	else:
+		show_team_surveys = False
+		st.info("Branch users can only view their own surveys.")
+	
+	selected_user_id = None
+	available_users = []
+	
+	if show_team_surveys and user_role != "Branch":  # Branch users can only see their own surveys
+		try:
+			with get_session() as db:
+				# Get users from subordinate levels
+				user_query = db.query(User)
+				if user_role == "Zone":
+					user_query = user_query.filter(
+						(User.zone_id == z) & 
+						(User.role.in_(["Region", "City", "Branch"]))
+					)
+				elif user_role == "Region":
+					user_query = user_query.filter(
+						(User.zone_id == z) & 
+						(User.region_id == r) & 
+						(User.role.in_(["City", "Branch"]))
+					)
+				elif user_role == "City":
+					user_query = user_query.filter(
+						(User.zone_id == z) & 
+						(User.region_id == r) & 
+						(User.city_id == c) & 
+						(User.role == "Branch")
+					)
+				
+				# Exclude the current user
+				user_query = user_query.filter(User.id != user_id)
+				
+				users = user_query.order_by(User.name).all()
+				available_users = [(u.id, f"{u.name} ({u.role} - {u.zone_id}-{u.region_id}-{u.city_id}-{u.branch_id})") for u in users]
+		except (SQLAlchemyError, OperationalError) as e:
+			st.warning(f"Could not load team members: {handle_db_error(e, 'loading team members')}")
+			available_users = []
+		
+		if available_users:
+			# Add "All users in my hierarchy" option
+			user_options = [("all", "All users in my hierarchy")] + available_users
+			selected_user_option = st.selectbox(
+				"Select specific user or view all:",
+				options=[opt[0] for opt in user_options],
+				format_func=lambda x: next(opt[1] for opt in user_options if opt[0] == x),
+				help="Choose a specific user or view all surveys from your hierarchy"
+			)
+			if selected_user_option != "all":
+				selected_user_id = selected_user_option
+		else:
+			st.info("No team members found in your hierarchy.")
+			show_team_surveys = False
+	
 	# Month-Year Selection
 	st.subheader("📅 Select Survey Period")
 	
 	# Get available periods with error handling
 	try:
 		with get_session() as db:
+			periods_q = _scoped_query(db, user_id, user_role, z, r, c, b, include_subordinates=show_team_surveys)
+			if selected_user_id:
+				periods_q = periods_q.filter(Survey.user_id == selected_user_id)
+			elif user_role == "Admin" and not show_team_surveys:
+				periods_q = periods_q.filter(Survey.user_id == user_id)
 			available_periods = (
-				_scoped_query(db, user_role, z, r, c, b)
+				periods_q
 				.with_entities(Survey.period)
 				.distinct()
 				.order_by(Survey.period.desc())
@@ -75,12 +144,16 @@ def render_dashboard() -> None:
 	# Get the selected survey with comprehensive error handling
 	try:
 		with get_session() as db:
-			selected_survey = (
-				_scoped_query(db, user_role, z, r, c, b)
-				.filter(Survey.period == selected_period)
-				.order_by(Survey.created_at.desc())
-				.first()
-			)
+			query = _scoped_query(db, user_id, user_role, z, r, c, b, include_subordinates=show_team_surveys)
+			query = query.filter(Survey.period == selected_period)
+			
+			# Add user filtering if specific user is selected
+			if selected_user_id:
+				query = query.filter(Survey.user_id == selected_user_id)
+			elif user_role == "Admin" and not show_team_surveys:
+				query = query.filter(Survey.user_id == user_id)
+			
+			selected_survey = query.order_by(Survey.created_at.desc()).first()
 			
 			if not selected_survey:
 				st.error("No survey found for the selected period.")
@@ -122,10 +195,19 @@ def render_dashboard() -> None:
 			# Get survey creator info with fallback
 			try:
 				survey_creator = db.query(User).filter(User.id == selected_survey.user_id).first()
-				creator_name = ((survey_creator.name or "").strip() if survey_creator else "") or "Unknown"
+				if survey_creator:
+					creator_name = (survey_creator.name or "").strip() or "Unknown"
+					creator_role = survey_creator.role or "Unknown"
+					creator_location = f"{survey_creator.zone_id}-{survey_creator.region_id}-{survey_creator.city_id}-{survey_creator.branch_id}"
+				else:
+					creator_name = "Unknown"
+					creator_role = "Unknown"
+					creator_location = "Unknown"
 			except Exception as e:
 				st.warning(f"Could not load survey creator info: {handle_db_error(e, 'loading creator info')}")
 				creator_name = "Unknown"
+				creator_role = "Unknown"
+				creator_location = "Unknown"
 			
 			# Get comments with user info and error handling
 			comments_data = []
@@ -194,7 +276,10 @@ def render_dashboard() -> None:
 		st.metric("Date", survey_data['created_at'].strftime("%Y-%m-%d"))
 	
 	# Survey creator info
-	st.info(f"👤 Survey filled by: **{creator_name}**")
+	if show_team_surveys and selected_survey.user_id != user_id:
+		st.info(f"👤 Survey filled by: **{creator_name}** ({creator_role} - {creator_location})")
+	else:
+		st.info(f"👤 Survey filled by: **{creator_name}**")
 	
 	# Category scores
 	st.subheader("📈 Category Breakdown")
@@ -256,15 +341,20 @@ def render_dashboard() -> None:
 	# Recent trends (if multiple surveys exist) with error handling
 	try:
 		with get_session() as db:
-			# Extract survey data inside session to prevent detached instance errors
-			recent_surveys = (
-				_scoped_query(db, user_role, z, r, c, b)
-				.filter(Survey.user_id == user_id)
-				.with_entities(Survey.period, Survey.overall_score, Survey.created_at)
-				.order_by(Survey.created_at.desc())
-				.limit(6)
-				.all()
-			)
+			# Use hierarchy-based query for trends
+			trends_query = _scoped_query(db, user_id, user_role, z, r, c, b, include_subordinates=show_team_surveys)
+			trends_query = trends_query.with_entities(Survey.period, Survey.overall_score, Survey.created_at, Survey.user_id)
+			
+			# Filter by selected user if a specific user is chosen
+			if show_team_surveys and selected_user_id and selected_user_id != "all":
+				trends_query = trends_query.filter(Survey.user_id == selected_user_id)
+			elif not show_team_surveys:
+				# If not showing team surveys, only show user's own surveys
+				trends_query = trends_query.filter(Survey.user_id == user_id)
+			elif user_role == "Admin" and not show_team_surveys:
+				trends_query = trends_query.filter(Survey.user_id == user_id)
+			
+			recent_surveys = trends_query.order_by(Survey.created_at.desc()).limit(6).all()
 			# Convert to dictionaries while session is active
 			trend_data = [{"period": s.period, "score": s.overall_score} for s in reversed(recent_surveys)]
 	except (SQLAlchemyError, OperationalError) as e:
@@ -275,7 +365,22 @@ def render_dashboard() -> None:
 		trend_data = []
 	
 	if len(trend_data) > 1:
+		# Update chart title based on what's being shown
+		if show_team_surveys and selected_user_id and selected_user_id != "all":
+			# Find the selected user's name
+			try:
+				with get_session() as db:
+					selected_user = db.query(User).filter(User.id == selected_user_id).first()
+					user_display_name = selected_user.name if selected_user else f"User {selected_user_id}"
+			except:
+				user_display_name = f"User {selected_user_id}"
+			chart_title = f"Overall Score Trend - {user_display_name}"
+		elif show_team_surveys:
+			chart_title = "Overall Score Trend - All Team Members"
+		else:
+			chart_title = "Overall Score Trend - Your Surveys"
+		
 		st.subheader("📊 Recent Performance Trends")
 		df_trend = pd.DataFrame(trend_data)
-		fig = px.line(df_trend, x="period", y="score", markers=True, title="Overall Score Trend")
+		fig = px.line(df_trend, x="period", y="score", markers=True, title=chart_title)
 		st.plotly_chart(fig, use_container_width=True)

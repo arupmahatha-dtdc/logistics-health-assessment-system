@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from auth import ensure_session, render_login, logout_user
 from pages_router import route_to_page
 from mappings_loader import load_mappings
-from db import cleanup_connections, get_connection_metrics, warm_connection_pool
+from db import cleanup_connections, warm_connection_pool
 import bootstrap
 
 # Load environment variables from .env file
@@ -28,6 +28,51 @@ warm_connection_pool()
 ensure_session()
 
 SESSION_TIMEOUT_MINUTES = int(os.getenv("SESSION_TIMEOUT_MINUTES", "60"))
+
+# Session timer fragment function
+@st.fragment(run_every=1)
+def show_session_timer():
+    """Real-time session timer that updates every second"""
+    if not st.session_state.get("last_activity_ts"):
+        return
+    
+    elapsed = int(time.time() - st.session_state["last_activity_ts"])
+    remaining = max(0, SESSION_TIMEOUT_MINUTES*60 - elapsed)
+    mins = remaining // 60
+    secs = remaining % 60
+    
+    # Color coding based on remaining time
+    if remaining < 300:  # Less than 5 minutes
+        icon = "🔴"
+        bg_color = "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"
+    elif remaining < 900:  # Less than 15 minutes
+        icon = "🟡"
+        bg_color = "linear-gradient(135deg, #feca57 0%, #ff9ff3 100%)"
+    else:
+        icon = "🟢"
+        bg_color = "linear-gradient(135deg, #48dbfb 0%, #0abde3 100%)"
+    
+    # Display the timer
+    st.markdown(f"""
+    <div style="
+        background: {bg_color};
+        color: white;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin: 0.5rem 0;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+    ">
+        {icon} Session: {mins:02d}:{secs:02d} remaining
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Handle automatic logout when timer reaches zero
+    if remaining <= 0:
+        st.session_state["session_expired"] = True
+        logout_user()
+        st.rerun()
 
 # Custom CSS for better navigation styling
 st.markdown("""
@@ -148,82 +193,10 @@ with st.sidebar:
 		</div>
 		""", unsafe_allow_html=True)
 		
-		# Real-time session timer
-		if st.session_state.get("last_activity_ts"):
-			elapsed = int(time.time() - st.session_state["last_activity_ts"])
-			remaining = max(0, SESSION_TIMEOUT_MINUTES*60 - elapsed)
-			mins = remaining // 60
-			secs = remaining % 60
-			
-			# Color coding based on remaining time
-			if remaining < 300:  # Less than 5 minutes
-				icon = "🔴"
-				bg_color = "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"
-			elif remaining < 900:  # Less than 15 minutes
-				icon = "🟡"
-				bg_color = "linear-gradient(135deg, #feca57 0%, #ff9ff3 100%)"
-			else:
-				icon = "🟢"
-				bg_color = "linear-gradient(135deg, #48dbfb 0%, #0abde3 100%)"
-			
-			# Create a container for the timer
-			timer_container = st.container()
-			with timer_container:
-				st.markdown(f"""
-				<div id="session-timer" style="
-					background: {bg_color};
-					color: white;
-					padding: 0.75rem;
-					border-radius: 0.5rem;
-					margin: 0.5rem 0;
-					text-align: center;
-					font-weight: bold;
-					font-size: 1.1rem;
-				">
-					{icon} Session: <span id="timer-display">{mins:02d}:{secs:02d}</span> remaining
-				</div>
-				""", unsafe_allow_html=True)
-			
-			# JavaScript for real-time countdown
-			st.markdown(f"""
-			<script>
-			let remainingSeconds = {remaining};
-			const timerElement = document.getElementById('timer-display');
-			
-			function updateTimer() {{
-				if (remainingSeconds <= 0) {{
-					timerElement.textContent = '00:00';
-					return;
-				}}
-				
-				const minutes = Math.floor(remainingSeconds / 60);
-				const seconds = remainingSeconds % 60;
-				timerElement.textContent = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-				remainingSeconds--;
-			}}
-			
-			// Update immediately and then every second
-			updateTimer();
-			setInterval(updateTimer, 1000);
-			</script>
-			""", unsafe_allow_html=True)
+		# Real-time session timer using fragment
+		show_session_timer()
 		
 		st.button("🚪 Logout", on_click=logout_user, type="secondary")
-		st.divider()
-		
-		# Connection health monitoring (for debugging)
-		if st.checkbox("🔧 Show DB Metrics", help="Display database connection metrics for debugging"):
-			try:
-				metrics = get_connection_metrics()
-				st.markdown("### 📊 Database Metrics")
-				st.metric("Successful Connections", metrics["successful_connections"])
-				st.metric("Failed Connections", metrics["failed_connections"])
-				st.metric("Success Rate", f"{metrics['success_rate']:.1%}")
-				if metrics["last_connection_test"]:
-					last_test = time.time() - metrics["last_connection_test"]
-					st.metric("Last Connection Test", f"{last_test:.0f}s ago")
-			except Exception as e:
-				st.error(f"Error loading metrics: {str(e)}")
 		st.divider()
 		
 		# Enhanced navigation
@@ -255,6 +228,8 @@ with st.sidebar:
 
 # Route to pages
 if page == "Login":
+	if st.session_state.pop("session_expired", False):
+		st.warning("Session expired due to inactivity. Please log in again.")
 	render_login()
 else:
 	if not st.session_state.get("is_authenticated"):
@@ -263,7 +238,8 @@ else:
 		st.stop()
 	# session timeout check
 	if st.session_state.get("last_activity_ts") and (time.time() - st.session_state["last_activity_ts"]) > (SESSION_TIMEOUT_MINUTES*60):
-		st.info("Session expired due to inactivity. Please log in again.")
+		if st.session_state.pop("session_expired", False):
+			st.warning("Session expired due to inactivity. Please log in again.")
 		logout_user()
 		render_login()
 		st.stop()
