@@ -29,8 +29,7 @@ ensure_session()
 
 SESSION_TIMEOUT_MINUTES = int(os.getenv("SESSION_TIMEOUT_MINUTES", "60"))
 
-# Session timer fragment function
-@st.fragment(run_every=1)
+# Session timer function (manual refresh each render)
 def show_session_timer():
     """Real-time session timer that updates every second"""
     if not st.session_state.get("last_activity_ts"):

@@ -8,7 +8,7 @@ from models import Base, Survey, Response, CategoryScore, AIFeedback
 from scoring import compute_question_score, compute_survey_scores
 from ai import generate_feedback
 from survey_definitions import FRAMEWORK
-from mappings_loader import load_mappings, get_zones, get_regions, get_cities, get_branches
+ 
 
 # Create tables on first run
 Base.metadata.create_all(bind=engine)
@@ -107,7 +107,7 @@ def render_survey() -> None:
 		else:
 			st.metric("Status", "New Survey")
 
-	m = load_mappings()
+    
 	user_role = st.session_state.get("user_role")
 	user_zone = st.session_state.get("user_zone_id")
 	user_region = st.session_state.get("user_region_id")
@@ -115,68 +115,21 @@ def render_survey() -> None:
 	user_branch = st.session_state.get("user_branch_id")
 
 
-	# Row 2: Zone / Region / City / Branch in one row with role-based restriction
-	col_zone, col_region, col_city, col_branch = st.columns([1,1,1,1])
-	# Zones (restrict by role)
-	zones_all = get_zones(m)
-	zones = zones_all
-	if user_role in ["Zone","Region","City","Branch"] and user_zone:
-		zones = [z for z in zones_all if z == user_zone]
-	
-	# After computing zones
-	if not zones:
-		st.error("No zones available for your assignment. Please contact the administrator.")
-		return
-	
-	with col_zone:
-		zone = st.selectbox("Zone", options=zones, index=0, disabled=(user_role in ["Region","City","Branch"]))
+	# Row 2: Show assigned Zone / Region / City / Branch as read-only info
+	st.subheader("📍 Assigned Location")
+	st.write(f"Zone: {user_zone or '—'} | Region: {user_region or '—'} | City: {user_city or '—'} | Branch: {user_branch or '—'}")
 
-	# Regions (restrict by role)
-	regions_all = get_regions(m, zone)
-	regions = regions_all
-	if user_role in ["Region","City","Branch"] and user_region:
-		regions = [r for r in regions_all if r == user_region]
-	
-	# Repeat for regions based on selected zone
-	if not regions:
-		st.error("No regions available for the selected zone. Please contact the administrator.")
-		return
-	
-	with col_region:
-		region = st.selectbox("Region", options=regions, index=0, disabled=(user_role in ["City","Branch"]))
+	# Ensure downstream variables exist for submission logic
+	zone = user_zone
+	region = user_region
+	city = user_city
+	branch = user_branch
 
-	# Cities (restrict by role)
-	cities_all = get_cities(m, zone, region)
-	cities = cities_all
-	if user_role in ["City","Branch"] and user_city:
-		cities = [c for c in cities_all if c == user_city]
-	
-	# Repeat for cities based on selected region
-	if not cities:
-		st.error("No cities available for the selected region. Please contact the administrator.")
+	# Guard: only allow intended self-survey roles
+	allowed_survey_roles = ["Zone", "Region", "City", "Branch"]
+	if user_role not in allowed_survey_roles:
+		st.error("Your role is not permitted to submit surveys. Please contact the administrator.")
 		return
-	
-	with col_city:
-		city = st.selectbox("City", options=cities, index=0, disabled=(user_role in ["Branch"]))
-
-	# Branches (restrict by role)
-	branches_all = get_branches(m, zone, region, city)
-	branches = branches_all
-	if user_role in ["Branch"] and user_branch:
-		branches = [b for b in branches_all if b == user_branch]
-	
-	# Repeat for branches based on selected city
-	if not branches:
-		st.error("No branches available for the selected city. Please contact the administrator.")
-		return
-	
-	with col_branch:
-		branch = st.selectbox(
-			"Branch (Code)",
-			options=branches,
-			index=0,
-			format_func=lambda b: f"{b} - {m.get(zone, {}).get(region, {}).get(city, {}).get(b, '')}"
-		)
 
 	categories = FRAMEWORK.get(user_role, [])
 	if not categories:
@@ -269,7 +222,7 @@ def render_survey() -> None:
 				city_id = st.session_state.get("user_city_id") if role in ["City","Branch"] else city
 				branch_id = st.session_state.get("user_branch_id") if role in ["Branch"] else branch
 				
-				# Optionally assert that any user-level-required ID exists, else st.error(...) and abort
+				# Validate that required location identifiers exist for all roles
 				if role in ["Zone","Region","City","Branch"] and not zone_id:
 					st.error("Zone ID is required for your role but not found in session. Please contact the administrator.")
 					return None, None, None, None
@@ -281,6 +234,10 @@ def render_survey() -> None:
 					return None, None, None, None
 				if role in ["Branch"] and not branch_id:
 					st.error("Branch ID is required for your role but not found in session. Please contact the administrator.")
+					return None, None, None, None
+				# Admin: enforce that all location fields are present if business rules require location for all surveys
+				if role == "Admin" and (not zone_id or not region_id or not city_id or not branch_id):
+					st.error("Admin surveys must include Zone, Region, City, and Branch. Please assign your location or switch to a permitted role.")
 					return None, None, None, None
 				
 				# Create new survey
