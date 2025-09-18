@@ -46,7 +46,7 @@ def infer_default_target(text: str, formula: str) -> float:
 	return 100.0
 
 
-def _q(text: str, weight: float = 2.0, formula: str = "HIB", target: Optional[float] = None) -> QuestionDef:
+def _q(text: str, weight: float = 10.0, formula: str = "HIB", target: Optional[float] = None) -> QuestionDef:
 	tgt = target if target is not None else infer_default_target(text, formula)
 	return {"text": text, "weight": weight, "formula": formula, "target": float(tgt)}
 

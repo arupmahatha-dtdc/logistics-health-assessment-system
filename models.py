@@ -97,7 +97,17 @@ class Task(Base):
 	id = Column(Integer, primary_key=True)
 	survey_id = Column(Integer, ForeignKey("surveys.id"), nullable=False)
 	description = Column(Text, nullable=False)
-	status = Column(String(16), default="Planned")  # Planned, Completed, Pending
+	status = Column(String(16), default="Planned")  # Planned, Executed, Completed
+	updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SurveyComment(Base):
+	__tablename__ = "survey_comments"
+	id = Column(Integer, primary_key=True)
+	survey_id = Column(Integer, ForeignKey("surveys.id"), nullable=False)
+	user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+	comment = Column(Text, nullable=False)
+	created_at = Column(DateTime, default=datetime.utcnow)
 	updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 

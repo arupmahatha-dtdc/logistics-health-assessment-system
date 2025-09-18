@@ -1,12 +1,28 @@
 import os
 import time
+import atexit
 import streamlit as st
+from dotenv import load_dotenv
 
 from auth import ensure_session, render_login, logout_user
 from pages_router import route_to_page
 from mappings_loader import load_mappings
+from db import cleanup_connections, get_connection_metrics, warm_connection_pool
+import bootstrap
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Register cleanup function to run on application exit
+atexit.register(cleanup_connections)
 
 st.set_page_config(page_title="Logistics Health Assessment", layout="wide")
+
+# Initialize database tables
+bootstrap.ensure_tables()
+
+# Warm up connection pool
+warm_connection_pool()
 
 # Initialize session
 ensure_session()
@@ -195,24 +211,37 @@ with st.sidebar:
 		st.button("🚪 Logout", on_click=logout_user, type="secondary")
 		st.divider()
 		
+		# Connection health monitoring (for debugging)
+		if st.checkbox("🔧 Show DB Metrics", help="Display database connection metrics for debugging"):
+			try:
+				metrics = get_connection_metrics()
+				st.markdown("### 📊 Database Metrics")
+				st.metric("Successful Connections", metrics["successful_connections"])
+				st.metric("Failed Connections", metrics["failed_connections"])
+				st.metric("Success Rate", f"{metrics['success_rate']:.1%}")
+				if metrics["last_connection_test"]:
+					last_test = time.time() - metrics["last_connection_test"]
+					st.metric("Last Connection Test", f"{last_test:.0f}s ago")
+			except Exception as e:
+				st.error(f"Error loading metrics: {str(e)}")
+		st.divider()
+		
 		# Enhanced navigation
 		st.markdown("### 🧭 Navigation")
 		
 		# Navigation options based on user role
 		if user_role in ["Admin", "Zone", "Region", "City"]:
-			nav_options = ["Dashboard","Survey","Tasks","Admin"]
+			nav_options = ["Dashboard","Survey","Admin"]
 			nav_format = {
 				"Dashboard": "📊 Dashboard", 
 				"Survey": "📝 Survey", 
-				"Tasks": "✅ Tasks", 
 				"Admin": "⚙️ Admin"
 			}
 		else:
-			nav_options = ["Dashboard","Survey","Tasks"]
+			nav_options = ["Dashboard","Survey"]
 			nav_format = {
 				"Dashboard": "📊 Dashboard", 
-				"Survey": "📝 Survey", 
-				"Tasks": "✅ Tasks"
+				"Survey": "📝 Survey"
 			}
 		
 		page = st.radio("Select Page", 
