@@ -1,0 +1,21 @@
+Category,Category Weight (%),Question,Expected Input,Scoring Formula (0–1)
+Space Utilization & Planning,15,What percentage of the facility’s total usable floor area is currently occupied by equipment or stored inventory?,Occupied floor area; total floor area,occupied/total
+,,What percentage of available employee workstations (seats) in the facility are currently utilized?,Number of seats in use; total seats,used/total
+,,"What percentage of installed storage racks or shelves are currently in use (i.e., have inventory placed)?",Number of racks/shelves in use; total racks/shelves,used/total
+,,What percentage of 5S audit criteria in the facility’s latest audit were marked as compliant?,Number of compliant 5S items; total 5S audit items,compliant/total
+,,What percentage of designated storage or workstation areas are clearly labeled and organized?,Number of labeled/organized areas; total designated areas,labeled/total
+Equipment & Maintenance,15,What percentage of scheduled preventive maintenance tasks for critical equipment were completed on time in the last quarter?,Number of PM tasks completed on time; total scheduled PM tasks,completed/scheduled
+,,What percentage of time were key machines operational (uptime) in the last month?,Uptime hours; total available operation hours,uptime/total
+,,How many critical equipment breakdown incidents occurred in the last year?,Count of breakdown incidents,1/(1+incidents)
+Capex & Budget Planning,15,What percentage of the facility’s allocated Capex budget has been spent to date this year?,Total Capex budget; amount spent so far,"min(spent/budget,1)"
+,,What percentage of completed Capex projects met their planned delivery date in the last year?,Projects on schedule; total projects completed,on_time/total
+,,What percentage of the facility’s building condition score (in the latest audit) was achieved relative to the maximum score?,Facility audit score; maximum possible score,score/max_score
+Project Execution,10,"What percentage of scheduled facility projects (e.g., renovations) were completed on or before their planned completion dates in the last year?",Projects on time; total projects planned,on_time/total
+,,What percentage of facility project milestones were achieved on time over the last year?,Milestones met on time; total milestones,on_time/total
+Automation & Technology,10,What percentage of planned automation upgrade projects were implemented in the last year?,Implemented projects; total planned projects,implemented/planned
+,,What was the operational uptime percentage of automated systems in the last quarter?,Uptime hours; total hours (machine could operate),uptime/total
+Safety & Quality,10,How many facility safety incidents were reported in the last year?,"Count of safety incidents (injuries, accidents)",1/(1+incidents)
+,,What percentage of safety audit checklist items were compliant in the latest facility safety audit?,Compliant checklist items; total checklist items,compliant/total
+,,"What percentage of critical safety equipment (e.g., fire extinguishers) are functional and up to date?",Functional safety equipment; total critical equipment,functional/total
+Data & Systems Management,10,"What percentage of facility master data entries (e.g., dimensions, capacities) are up to date in the central database?",Up-to-date entries; total entries,updated/total
+,,What percentage of facility records are free from data errors (as per the latest data audit)?,Error-free records; total records,correct/total
